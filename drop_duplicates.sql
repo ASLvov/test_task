@@ -1,22 +1,34 @@
-drop table if exists public.client_balance;
+DROP TABLE client_balance;
 
-CREATE TABLE public.client_balance (
-	client_id int8 NOT NULL,
-	client_name varchar NOT NULL,
-	client_balance_date timestamp NOT NULL,
-	client_balance_value numeric NOT NULL
+CREATE TABLE client_balance (
+	client_id NUMBER NOT NULL,
+	client_name VARCHAR(255) NOT NULL,
+	client_balance_date TIMESTAMP NOT NULL,
+	client_balance_value NUMBER NOT NULL
 );
 
-insert into public.client_balance(client_id, client_name, client_balance_date, client_balance_value) values 
-(1, 'klient_1', to_timestamp('20-05-2022 18:50:00', 'dd-mm-yyyy hh24:mi:ss'), '1500.00'),
-(1, 'klient_1', to_timestamp('20-05-2022 18:50:00', 'dd-mm-yyyy hh24:mi:ss'), '1500.00'),
-(1, 'klient_1', to_timestamp('20-05-2022 17:50:00', 'dd-mm-yyyy hh24:mi:ss'), '1000.00'),
-(2, 'klient_2', to_timestamp('20-05-2022 17:50:00', 'dd-mm-yyyy hh24:mi:ss'), '500.00'),
-(2, 'klient_2', to_timestamp('20-05-2022 18:50:00', 'dd-mm-yyyy hh24:mi:ss'), '1000.00'),
-(2, 'klient_2', to_timestamp('20-05-2022 18:50:00', 'dd-mm-yyyy hh24:mi:ss'), '1000.00');
-	
-with del as 
-	(delete from public.client_balance cb2)
-	insert into public.client_balance 
-		select distinct * from public.client_balance cb 
-			order by client_id, client_name, client_balance_date, client_balance_value;
+INSERT INTO client_balance(client_id, client_name, client_balance_date, client_balance_value) VALUES 
+(1, 'klient_1', TO_TIMESTAMP('20-MAY-22 06:50:00 PM'), '1500.00');
+INSERT INTO client_balance(client_id, client_name, client_balance_date, client_balance_value) VALUES 
+(1, 'klient_1', TO_TIMESTAMP('20-MAY-22 06:50:00 PM'), '1500.00');
+INSERT INTO client_balance(client_id, client_name, client_balance_date, client_balance_value) VALUES 
+(1, 'klient_1', TO_TIMESTAMP('20-MAY-22 05:50:00 PM'), '1000.00');
+INSERT INTO client_balance(client_id, client_name, client_balance_date, client_balance_value) VALUES 
+(2, 'klient_2', TO_TIMESTAMP('20-MAY-22 05:50:00 PM'), '500.00');
+INSERT INTO client_balance(client_id, client_name, client_balance_date, client_balance_value) VALUES 
+(2, 'klient_2', TO_TIMESTAMP('20-MAY-22 06:50:00 PM'), '1000.00');
+INSERT INTO client_balance(client_id, client_name, client_balance_date, client_balance_value) VALUES 
+(2, 'klient_2', TO_TIMESTAMP('20-MAY-22 06:50:00 PM'), '1000.00');
+
+SELECT cb.* FROM client_balance cb;
+
+DELETE FROM client_balance cb
+WHERE cb.ROWID IN
+	(SELECT ROWID FROM
+		(SELECT ROWID, ROW_NUMBER() OVER
+			(PARTITION BY client_id, client_name, client_balance_date, client_balance_value
+			    ORDER BY client_id, client_name, client_balance_date, client_balance_value) dup_row_num
+		FROM client_balance) tbl
+		WHERE tbl.dup_row_num > 1);
+		
+SELECT cb.* FROM client_balance cb;
